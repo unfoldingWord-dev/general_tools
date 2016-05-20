@@ -11,15 +11,15 @@ def read(f_name):
 
 
 setup(
-    name="general_tools",
+    name="uw_tools",
     version="0.0.1",
     author="unfoldingWord",
     author_email="unfoldingword.org",
     description="A collection of useful scripts",
     license="MIT",
-    keywords="unfoldingWord general tools",
-    url="https://github.org/unfoldingWord-dev/general_tools",
-    packages=['general_tools', ],
+    keywords="unfoldingWord python tools",
+    url="https://github.org/unfoldingWord-dev/uw_tools",
+    packages=['general_tools', 'uw'],
     long_description=read('README.md'),
     classifiers=[],
     requires=['pygithub', ]

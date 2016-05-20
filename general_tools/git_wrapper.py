@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # -*- coding: utf8 -*-
 #
 #  Copyright (c) 2014, 2016 unfoldingWord
@@ -11,9 +10,15 @@
 #
 #  Requires PyGithub for Github commands.
 
+from __future__ import print_function, unicode_literals
 import shlex
 from subprocess import *
+# noinspection PyPackageRequirements
 from github import Github, GithubException
+
+
+# noinspection PyPep8Naming
+from general_tools.print_utils import print_warning
 
 
 # noinspection PyPep8Naming
@@ -48,7 +53,7 @@ def githubCreate(d, r_name, r_desc, r_url, org):
     os.chdir(d)
     out, ret = runCommand('git remote add origin {0}'.format(repo.ssh_url))
     if ret > 0:
-        print 'Failed to add Github remote to repo in: {0}'.format(d)
+        print_warning('Failed to add Github remote to repo in: {0}'.format(d))
 
 
 # noinspection PyPep8Naming
@@ -62,7 +67,7 @@ def gitCreate(d):
     os.chdir(d)
     out, ret = runCommand('git init .')
     if ret > 0:
-        print 'Failed to create a git repo in: {0}'.format(d)
+        print_warning('Failed to create a git repo in: {0}'.format(d))
         sys.exit(1)
 
 
@@ -75,8 +80,8 @@ def gitCommit(d, msg, files='*'):
     out, ret = runCommand('git add {0}'.format(files))
     out1, ret1 = runCommand('''git commit -am "{0}" '''.format(msg))
     if ret > 0 or ret1 > 0:
-        print 'Nothing to commit, or failed commit to repo in: {0}'.format(d)
-        print out1
+        print('Nothing to commit, or failed commit to repo in: {0}'.format(d))
+        print(out1)
 
 
 # noinspection PyPep8Naming
@@ -87,8 +92,8 @@ def gitPush(d):
     os.chdir(d)
     out, ret = runCommand('git push origin master')
     if ret > 0:
-        print out
-        print 'Failed to push repo to origin master in: {0}'.format(d)
+        print(out)
+        print('Failed to push repo to origin master in: {0}'.format(d))
 
 
 # noinspection PyPep8Naming
@@ -99,8 +104,8 @@ def gitPull(d):
     os.chdir(d)
     out, ret = runCommand('git pull --no-edit origin master')
     if ret > 0:
-        print out
-        print 'Failed to pull from origin master in: {0}'.format(d)
+        print(out)
+        print('Failed to pull from origin master in: {0}'.format(d))
 
 
 # noinspection PyPep8Naming
@@ -111,8 +116,8 @@ def gitClone(d, remote):
     """
     out, ret = runCommand('git clone {0} {1}'.format(remote, d))
     if ret > 0:
-        print out
-        print 'Failed to clone from {0} to {1}'.format(remote, d)
+        print(out)
+        print('Failed to clone from {0} to {1}'.format(remote, d))
 
 
 # noinspection PyPep8Naming
@@ -120,7 +125,7 @@ def createHallHook(repo, room_id):
     """
     Creates a hall hook for the given repository to the given room.
     """
-    config = {u'room_token': unicode(room_id)}
+    config = {u'room_token': room_id}
     repo.create_hook(u'hall', config)
 
 
