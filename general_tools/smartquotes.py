@@ -13,6 +13,7 @@ This script accepts a paragraph of input and outputs typographically correct
 text using pandoc.  Note line breaks are not retained.
 """
 
+from __future__ import unicode_literals
 import shlex
 from subprocess import *
 
@@ -30,4 +31,4 @@ def smartquotes(text):
 
 
 if __name__ == '__main__':
-    print smartquotes(sys.stdin.read())
+    print(smartquotes(sys.stdin.read()))
