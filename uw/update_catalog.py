@@ -37,7 +37,7 @@ bible_dirs = [
     'phm', 'php', 'pro', 'rev', 'rom', 'rut', 'sng', 'tit', 'zec',
     'zep', 'isa', 'psa'
 ]
-bible_slugs = [('udb', 'en'), ('ulb', 'en'), ('avd', 'ar')]
+bible_slugs = [('udb', 'en'), ('ulb', 'en')]
 
 usfm_api = 'https://api.unfoldingword.org/{0}/txt/1/{0}-{1}/{2}?{3}'
 bible_stat = 'https://api.unfoldingword.org/{0}/txt/1/{0}-{1}/status.json'
@@ -59,7 +59,10 @@ class CatalogUpdater(object):
 
         dir_base = '/var/www/vhosts/api.unfoldingword.org/httpdocs/{0}/txt/1/'
 
-        for ver in ['ulb', 'udb']:
+        # ulb = Unlocked Literal Bible
+        # udb = Unlocked Dynamic Bible
+        # pdb = Public Domain Bibles
+        for ver in ['ulb', 'udb', 'pdb']:
             dir_name = dir_base.format(ver)
             if not os.path.isdir(dir_name):
                 continue
