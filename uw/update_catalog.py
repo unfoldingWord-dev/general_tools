@@ -13,7 +13,7 @@
 """
 Updates the catalog for the translationStudio and unfoldingWord v2 APIs.
 """
-from __future__ import print_function, unicode_literals
+from __future__ import unicode_literals
 import argparse
 import os
 import json
@@ -400,10 +400,10 @@ def update_catalog(slug=None, lang=None):
     else:
         bible_slugs = CatalogUpdater.get_additional_bibles()
 
-    # # OBS
-    # obs_v1 = get_url(obs_v1_url, True)
-    # obs_v1_catalog = json.loads(obs_v1)
-    # CatalogUpdater.obs(deepcopy(obs_v1_catalog))
+    # OBS
+    obs_v1 = get_url(obs_v1_url, True)
+    obs_v1_catalog = json.loads(obs_v1)
+    CatalogUpdater.obs(deepcopy(obs_v1_catalog))
 
     # Bible
     lang_names = json.loads(get_url(lang_url, True))
@@ -418,7 +418,7 @@ def update_catalog(slug=None, lang=None):
 
     # Global
     CatalogUpdater.ts_cat()
-    # CatalogUpdater.uw_cat(obs_v1_catalog, bible_status)
+    CatalogUpdater.uw_cat(obs_v1_catalog, bible_status)
 
 
 if __name__ == '__main__':
