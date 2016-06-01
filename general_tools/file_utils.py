@@ -66,11 +66,12 @@ def load_json_object(file_name):
         return json.loads(content)
 
 
-def write_file(file_name, file_contents):
+def write_file(file_name, file_contents, indent=None):
     """
     Writes the <file_contents> to <file_name>. If <file_contents> is not a string, it is serialized as JSON.
     :param str|unicode file_name: The name of the file to write
     :param str|unicode|object file_contents: The string to write or the object to serialize
+    :param int indent: Specify a value if you want the output formatted to be more easily readable
     """
     # make sure the directory exists
     make_dir(os.path.dirname(file_name))
@@ -78,7 +79,7 @@ def write_file(file_name, file_contents):
     if isinstance(file_contents, string_types):
         text_to_write = file_contents
     else:
-        text_to_write = json.dumps(file_contents, sort_keys=True)
+        text_to_write = json.dumps(file_contents, sort_keys=True, indent=indent)
 
     with codecs.open(file_name, 'w', encoding='utf-8') as out_file:
         out_file.write(text_to_write)
