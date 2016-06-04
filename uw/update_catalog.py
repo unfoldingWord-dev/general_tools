@@ -18,12 +18,11 @@ import argparse
 import os
 import json
 import time
-# noinspection PyUnresolvedReferences
 import datetime as dt
 from copy import deepcopy
 import sys
 
-from general_tools.file_utils import write_file
+from general_tools.file_utils import write_file, load_json_object
 from general_tools.url_utils import get_url
 
 project_dirs = ['obs']
@@ -38,9 +37,10 @@ bible_dirs = [
     'zep', 'isa', 'psa'
 ]
 
-usfm_api = 'https://api.unfoldingword.org/{0}/txt/1/{1}-{2}/{3}?{4}'
-bible_stat = 'https://api.unfoldingword.org/{0}/txt/1/{1}-{2}/status.json'
+usfm_api = 'https://api.unfoldingword.org/{0}/txt/1/{1}-{2}/{3}'
+bible_stat = '/var/www/vhosts/api.unfoldingword.org/httpdocs/{0}/txt/1/{1}-{2}/status.json'
 obs_v1_api = 'https://api.unfoldingword.org/obs/txt/1'
+obs_v1_local = '/var/www/vhosts/api.unfoldingword.org/httpdocs/obs/txt/1'
 obs_v1_url = '{0}/obs-catalog.json'.format(obs_v1_api)
 obs_v2_local = '/var/www/vhosts/api.unfoldingword.org/httpdocs/ts/txt/2'
 obs_v2_api = 'https://api.unfoldingword.org/ts/txt/2'
@@ -90,9 +90,11 @@ class CatalogUpdater(object):
         langs_cat = []
         # Write OBS catalog for each language
         for e in obs_v1_cat:
-            front = get_url('{0}/{1}/obs-{1}-front-matter.json'.format(obs_v1_api,
-                                                                       e['language']), True)
-            front_json = json.loads(front)
+            file_name = '{0}/{1}/obs-{1}-front-matter.json'.format(obs_v1_local, e['language'])
+            if not os.path.isfile(file_name):
+                continue
+
+            front_json = load_json_object(file_name)
             lang_entry = {'language': {'slug': e['language'],
                                        'name': e['string'],
                                        'direction': e['direction'],
@@ -107,14 +109,10 @@ class CatalogUpdater(object):
             del e['direction']
             e['slug'] = 'obs'
             e['name'] = 'Open Bible Stories'
-            e['source'] = CatalogUpdater.add_date('{0}/{1}/obs-{1}.json'.format(obs_v1_api,
-                                                                                e['language']))
-            e['terms'] = CatalogUpdater.add_date('{0}/{1}/kt-{1}.json'.format(obs_v1_api,
-                                                                              e['language']))
-            e['notes'] = CatalogUpdater.add_date('{0}/{1}/tN-{1}.json'.format(obs_v1_api,
-                                                                              e['language']))
-            e['tw_cat'] = CatalogUpdater.add_date('{0}/{1}/tw_cat-{1}.json'.format(obs_v1_api,
-                                                                                   e['language']))
+            e['source'] = CatalogUpdater.add_date('{0}/{1}/obs-{1}.json'.format(obs_v1_api, e['language']))
+            e['terms'] = CatalogUpdater.add_date('{0}/{1}/kt-{1}.json'.format(obs_v1_api, e['language']))
+            e['notes'] = CatalogUpdater.add_date('{0}/{1}/tN-{1}.json'.format(obs_v1_api, e['language']))
+            e['tw_cat'] = CatalogUpdater.add_date('{0}/{1}/tw_cat-{1}.json'.format(obs_v1_api, e['language']))
             e['checking_questions'] = CatalogUpdater.add_date('{0}/{1}/CQ-{1}.json'.format(
                 obs_v1_api, e['language']))
             e['date_modified'] = CatalogUpdater.most_recent(e)
@@ -199,7 +197,7 @@ class CatalogUpdater(object):
                         source_date = slug_cat['source'].split('?')[1]
                     usfm_name = '{0}-{1}.usfm'.format(this_status[
                                                           'books_published'][bk]['sort'], bk.upper())
-                    slug_cat['usfm'] = usfm_api.format(domain, slug, lang, usfm_name, source_date).rstrip('?')
+                    slug_cat['usfm'] = usfm_api.format(domain, slug, lang, usfm_name) + '?' + source_date
                     slug_cat['terms'] = CatalogUpdater.add_date('{0}/bible/{1}/terms.json'.format(
                         obs_v2_api, lang))
                     slug_cat['notes'] = CatalogUpdater.add_date('{0}/{1}/{2}/notes.json'.format(
@@ -267,9 +265,12 @@ class CatalogUpdater(object):
         for x in bible_dirs:
             project_dirs.append(x)
         for p in project_dirs:
+            file_name = '{0}/{1}/languages.json'.format(obs_v2_local, p)
+            proj_cat = load_json_object(file_name)
+            if not proj_cat:
+                continue
+
             proj_url = '{0}/{1}/languages.json'.format(obs_v2_api, p)
-            proj_data = get_url(proj_url, True)
-            proj_cat = json.loads(proj_data)
             dates = set([x['language']['date_modified'] for x in proj_cat])
             dates_list = list(dates)
             dates_list.sort(reverse=True)
@@ -324,7 +325,7 @@ class CatalogUpdater(object):
 
             for x in bk_pub:
                 usfm_name = '{0}-{1}.usfm'.format(bk_pub[x]['sort'], x.upper())
-                source = usfm_api.format(domain, slug, lang, usfm_name, '').rstrip('?')
+                source = usfm_api.format(domain, slug, lang, usfm_name)
                 source_sig = source.replace('.usfm', '.sig')
                 pdf = source.replace('.usfm', '.pdf')
                 ver['toc'].append({'title': bk_pub[x]['name'],
@@ -425,12 +426,14 @@ def update_catalog(domain=None, slug=None, lang=None):
     lang_names = json.loads(get_url(lang_url, True))
     bible_status = {}
     bible_bks = []
-    langs = set([x[1] for x in updater.bible_slugs])
+    langs = set([x[2] for x in updater.bible_slugs])
     for domain, slug, lang in updater.bible_slugs:
-        stat = get_url(bible_stat.format(domain, slug, lang), True)
-        if stat:
-            bible_status[(domain, slug, lang)] = json.loads(stat)
-            bible_bks += bible_status[(domain, slug, lang)]['books_published'].keys()
+        file_name = bible_stat.format(domain, slug, lang)
+        if not os.path.isfile(file_name):
+            continue
+
+        bible_status[(domain, slug, lang)] = load_json_object(file_name)
+        bible_bks += bible_status[(domain, slug, lang)]['books_published'].keys()
 
     updater.bible(lang_names, bible_status, bible_bks, langs)
 
