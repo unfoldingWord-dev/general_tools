@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf8 -*-
 #
-#  Copyright (c) 2015 unfoldingWord
+#  Copyright (c) 2015, 2016 unfoldingWord
 #  http://creativecommons.org/licenses/MIT/
 #  See LICENSE file for details.
 #
@@ -21,7 +21,6 @@ import time
 import datetime as dt
 from copy import deepcopy
 import sys
-
 from general_tools.file_utils import write_file, load_json_object
 from general_tools.url_utils import get_url
 
@@ -190,22 +189,48 @@ class CatalogUpdater(object):
 
                     lang = this_status['lang']
                     slug_cat = deepcopy(this_status)
-                    slug_cat['source'] = CatalogUpdater.add_date('{0}/{1}/{2}/{3}/source.json'
-                                                                 .format(obs_v2_api, bk, lang, slug))
+
+                    # add link to source
+                    if os.path.isfile('{0}/{1}/{2}/{3}/source.json'.format(obs_v2_local, bk, lang, slug)):
+                        slug_cat['source'] = CatalogUpdater.add_date('{0}/{1}/{2}/{3}/source.json'
+                                                                     .format(obs_v2_api, bk, lang, slug))
+                    else:
+                        slug_cat['source'] = ''
+
                     source_date = ''
                     if '?' in slug_cat['source']:
                         source_date = slug_cat['source'].split('?')[1]
-                    usfm_name = '{0}-{1}.usfm'.format(this_status[
-                                                          'books_published'][bk]['sort'], bk.upper())
+                    usfm_name = '{0}-{1}.usfm'.format(this_status['books_published'][bk]['sort'], bk.upper())
+
+                    # add link to usfm
                     slug_cat['usfm'] = usfm_api.format(domain, slug, lang, usfm_name) + '?' + source_date
-                    slug_cat['terms'] = CatalogUpdater.add_date('{0}/bible/{1}/terms.json'.format(
-                        obs_v2_api, lang))
-                    slug_cat['notes'] = CatalogUpdater.add_date('{0}/{1}/{2}/notes.json'.format(
-                        obs_v2_api, bk, lang))
-                    slug_cat['tw_cat'] = CatalogUpdater.add_date('{0}/{1}/{2}/tw_cat.json'.format(
-                        obs_v2_api, bk, lang))
-                    slug_cat['checking_questions'] = CatalogUpdater.add_date(
-                        '{0}/{1}/{2}/questions.json'.format(obs_v2_api, bk, lang))
+
+                    # add link to terms
+                    if os.path.isfile('{0}/bible/{1}/terms.json'.format(obs_v2_local, lang)):
+                        slug_cat['terms'] = CatalogUpdater.add_date('{0}/bible/{1}/terms.json'.format(obs_v2_api, lang))
+                    else:
+                        slug_cat['terms'] = ''
+
+                    # add link to notes
+                    if os.path.isfile('{0}/{1}/{2}/notes.json'.format(obs_v2_local, bk, lang)):
+                        slug_cat['notes'] = CatalogUpdater.add_date('{0}/{1}/{2}/notes.json'.format(obs_v2_api, bk,
+                                                                                                    lang))
+                    else:
+                        slug_cat['notes'] = ''
+
+                    # add link to tW
+                    if os.path.isfile('{0}/{1}/{2}/tw_cat.json'.format(obs_v2_local, bk, lang)):
+                        slug_cat['tw_cat'] = CatalogUpdater.add_date('{0}/{1}/{2}/tw_cat.json'.format(obs_v2_api, bk,
+                                                                                                      lang))
+                    else:
+                        slug_cat['tw_cat'] = ''
+
+                    # add link to tQ
+                    if os.path.isfile('{0}/{1}/{2}/questions.json'.format(obs_v2_local, bk, lang)):
+                        slug_cat['checking_questions'] = CatalogUpdater.add_date('{0}/{1}/{2}/questions.json'
+                                                                                 .format(obs_v2_api, bk, lang))
+                    else:
+                        slug_cat['checking_questions'] = ''
 
                     del slug_cat['books_published']
                     del slug_cat['lang']
@@ -215,9 +240,11 @@ class CatalogUpdater(object):
                     slug_cat['slug'] = slug
 
                     resources_cat.append(slug_cat)
-                outfile = '{0}/{1}/{2}/resources.json'.format(obs_v2_local, bk,
-                                                              lang_iter)
-                write_file(outfile, resources_cat)
+
+                # only write the file if there is something to publish
+                if resources_cat:
+                    outfile = '{0}/{1}/{2}/resources.json'.format(obs_v2_local, bk, lang_iter)
+                    write_file(outfile, resources_cat)
 
         for bk in bks_set:
             languages_cat = []
