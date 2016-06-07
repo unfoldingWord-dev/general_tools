@@ -49,21 +49,25 @@ def make_dir(dir_name, linux_mode=0o755, error_if_not_writable=False):
             raise IOError('Directory {0} is not writable.'.format(dir_name))
 
 
-def load_json_object(file_name):
+def load_json_object(file_name, default=None):
     """
     Deserialized <file_name> into a Python object
     :param str|unicode file_name: The name of the file to read
+    :param default: The value to return if the file is not found
     """
+    if not os.path.isfile(file_name):
+        return default
+
     # use utf-8-sig in case the file has a Byte Order Mark
     with codecs.open(file_name, 'r', 'utf-8-sig') as in_file:
         # read the text from the file
         content = in_file.read()
 
-        # convert Windows line endings to Linux line endings
-        content = content.replace('\r\n', '\n')
+    # convert Windows line endings to Linux line endings
+    content = content.replace('\r\n', '\n')
 
-        # return a deserialized object
-        return json.loads(content)
+    # return a deserialized object
+    return json.loads(content)
 
 
 def write_file(file_name, file_contents, indent=None):
