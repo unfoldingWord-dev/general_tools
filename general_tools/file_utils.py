@@ -33,6 +33,15 @@ def unzip(source_file, destination_dir):
     with zipfile.ZipFile(source_file) as zf:
         zf.extractall(destination_dir)
 
+def add_file_to_zip(zip_file, filename, arcname=None, compress_type=None):
+    """
+    Zip <filename> into <zip_file> as <arcname>.
+    :param str|unicode zip_file: The file name of the zip file
+    :param str|unicode filename: The name of the file to add, including the path
+    :param str|unicode archname: The new name, with directories, of the file, the same as filename if not given
+    """
+    with zipfile.ZipFile(zip_file, 'a') as zf:
+        zf.write(filename, arcname, compress_type)
 
 def make_dir(dir_name, linux_mode=0o755, error_if_not_writable=False):
     """
