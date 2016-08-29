@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/unfoldingWord-dev/uw_tools.svg)](https://travis-ci.org/unfoldingWord-dev/uw_tools) [![Coverage Status](https://coveralls.io/repos/github/unfoldingWord-dev/uw_tools/badge.svg)](https://coveralls.io/github/unfoldingWord-dev/uw_tools)
+
 # unfoldingWord Python Tools
 
 A collection of Python scripts that have proven useful and have been reused.

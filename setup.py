@@ -12,7 +12,7 @@ def read(f_name):
 
 setup(
     name="uw_tools",
-    version="0.0.3",
+    version="0.0.4",
     author="unfoldingWord",
     author_email="unfoldingword.org",
     description="A collection of useful scripts",

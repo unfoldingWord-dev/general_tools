@@ -26,7 +26,11 @@ def get_url(url, catch_exception=False):
         with closing(urllib2.urlopen(url)) as request:
             response = request.read()
 
-    return response
+    # convert bytes to str (Python 3.5)
+    if type(response) is bytes:
+        return response.decode('utf-8')
+    else:
+        return response
 
 
 def download_file(url, outfile):
