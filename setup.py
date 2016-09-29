@@ -1,26 +1,21 @@
-import os
 from setuptools import setup
 
+long_description = '''A collection of Python scripts that have proven useful and have been reused.
 
-# Utility function to read the README file.
-# Used for the long_description.  It's nice, because now 1) we have a top level
-# README file and 2) it's easier to type in the README file than to put a raw
-# string in below ...
-def read(f_name):
-    return open(os.path.join(os.path.dirname(__file__), f_name)).read()
-
+As the files are moved from their original location into this project, we are trying to make sure they are compatible
+with both Python 2.7 and 3.5.'''
 
 setup(
     name="uw_tools",
     version="0.0.4",
     author="unfoldingWord",
-    author_email="unfoldingword.org",
+    author_email="phillip_hopper@wycliffeassociates.org",
     description="A collection of useful scripts",
     license="MIT",
     keywords="unfoldingWord python tools",
     url="https://github.org/unfoldingWord-dev/uw_tools",
     packages=['general_tools', 'uw'],
-    long_description=read('README.md'),
+    long_description=long_description,
     classifiers=[],
     requires=['pygithub', 'pyparsing']
 )
