@@ -11,5 +11,6 @@ setup(
     packages=['general_tools', 'uw'],
     long_description='Unit test setup file',
     classifiers=[],
+    requires=['pygithub', 'pyparsing'],
     test_suite='tests'
 )

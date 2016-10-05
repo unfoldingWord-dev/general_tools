@@ -22,5 +22,5 @@ setup(
     packages=['general_tools', 'uw'],
     long_description=read('README.md'),
     classifiers=[],
-    requires=['pygithub', ]
+    requires=['pygithub', 'pyparsing']
 )
