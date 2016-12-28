@@ -104,25 +104,32 @@ class CatalogUpdater(object):
                                       'meta': []
                                       }
                           }
+            lang = e['language']
+            del e['language']
             del e['string']
             del e['direction']
             e['slug'] = 'obs'
             e['name'] = 'Open Bible Stories'
-            e['source'] = CatalogUpdater.add_date('{0}/{1}/obs-{1}.json'.format(obs_v1_api, e['language']))
-            e['terms'] = CatalogUpdater.add_date('{0}/{1}/kt-{1}.json'.format(obs_v1_api, e['language']))
-            e['notes'] = CatalogUpdater.add_date('{0}/{1}/tN-{1}.json'.format(obs_v1_api, e['language']))
-            e['tw_cat'] = CatalogUpdater.add_date('{0}/{1}/tw_cat-{1}.json'.format(obs_v1_api, e['language']))
-            e['checking_questions'] = CatalogUpdater.add_date('{0}/{1}/CQ-{1}.json'.format(
-                obs_v1_api, e['language']))
+            e['source'] = CatalogUpdater.add_date('{0}/{1}/obs-{1}.json'.format(obs_v1_api, lang))
+
+            if lang == 'en':
+                e['terms'] = CatalogUpdater.add_date('{0}/{1}/kt-{1}.json'.format(obs_v1_api, lang))
+                e['notes'] = CatalogUpdater.add_date('{0}/{1}/tN-{1}.json'.format(obs_v1_api, lang))
+                e['tw_cat'] = CatalogUpdater.add_date('{0}/{1}/tw_cat-{1}.json'.format(obs_v1_api, lang))
+                e['checking_questions'] = CatalogUpdater.add_date('{0}/{1}/CQ-{1}.json'.format(obs_v1_api, lang))
+            else:
+                e['terms'] = ''
+                e['notes'] = ''
+                e['tw_cat'] = ''
+                e['checking_questions'] = ''
+
             e['date_modified'] = CatalogUpdater.most_recent(e)
-            outfile = '{0}/obs/{1}/resources.json'.format(obs_v2_local,
-                                                          e['language'])
-            lang = e['language']
-            del e['language']
+            outfile = '{0}/obs/{1}/resources.json'.format(obs_v2_local, lang)
+
             write_file(outfile, [e])
 
-            lang_entry['res_catalog'] = '{0}/obs/{1}/resources.json?date_modified={2}'.format(
-                obs_v2_api, lang, e['date_modified'])
+            lang_entry['res_catalog'] = '{0}/obs/{1}/resources.json?date_modified={2}'.format(obs_v2_api, lang,
+                                                                                              e['date_modified'])
             langs_cat.append(lang_entry)
 
         # Write global OBS catalog
@@ -410,7 +417,9 @@ class CatalogUpdater(object):
         uw_obs['langs'].sort(key=lambda c: c['lc'])
 
         # Write combined uW catalog
+        # noinspection PyTypeChecker
         mods = [int(x['mod']) for x in uw_bible['langs']]
+        # noinspection PyTypeChecker
         mods += [int(x['mod']) for x in uw_obs['langs']]
         mods.sort(reverse=True)
         uw_category = {'cat': [uw_bible, uw_obs], 'mod': mods[0]}
