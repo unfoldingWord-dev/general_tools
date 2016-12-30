@@ -24,33 +24,43 @@ import sys
 from general_tools.file_utils import write_file, load_json_object
 from general_tools.url_utils import get_url
 
-project_dirs = ['obs']
-bible_dirs = [
-    '1ch', '1co', '1jn', '1ki', '1pe', '1sa', '1th', '1ti', '2ch',
-    '2co', '2jn', '2ki', '2pe', '2sa', '2th', '2ti', '3jn', 'act',
-    'amo', 'col', 'dan', 'deu', 'ecc', 'eph', 'est', 'exo', 'ezk',
-    'ezr', 'gal', 'gen', 'hab', 'hag', 'heb', 'hos', 'jas', 'jdg',
-    'jer', 'jhn', 'job', 'jol', 'jon', 'jos', 'jud', 'lam', 'lev',
-    'luk', 'mal', 'mat', 'mic', 'mrk', 'nam', 'neh', 'num', 'oba',
-    'phm', 'php', 'pro', 'rev', 'rom', 'rut', 'sng', 'tit', 'zec',
-    'zep', 'isa', 'psa'
-]
 
-usfm_api = 'https://api.unfoldingword.org/{0}/txt/1/{1}-{2}/{3}'
+PY3 = sys.version_info[0] == 3
+if PY3:
+    unicode_type = str,
+else:
+    unicode_type = unicode,
+
+
 bible_stat = '/var/www/vhosts/api.unfoldingword.org/httpdocs/{0}/txt/1/{1}-{2}/status.json'
-obs_v1_api = 'https://api.unfoldingword.org/obs/txt/1'
-obs_v1_local = '/var/www/vhosts/api.unfoldingword.org/httpdocs/obs/txt/1'
-obs_v1_url = '{0}/obs-catalog.json'.format(obs_v1_api)
-obs_v2_local = '/var/www/vhosts/api.unfoldingword.org/httpdocs/ts/txt/2'
-obs_v2_api = 'https://api.unfoldingword.org/ts/txt/2'
-uw_v2_api = 'https://api.unfoldingword.org/uw/txt/2/catalog.json'
-uw_v2_local = '/var/www/vhosts/api.unfoldingword.org/httpdocs/uw/txt/2/catalog.json'
 lang_url = 'http://td.unfoldingword.org/exports/langnames.json'
-ts_obs_langs_url = 'https://api.unfoldingword.org/ts/txt/2/obs/languages.json'
-obs_audio_url = 'https://api.unfoldingword.org/obs/mp3/1/en/en-obs-v4/status.json'
 
 
 class CatalogUpdater(object):
+
+    project_dirs = ['obs']
+    bible_dirs = [
+        '1ch', '1co', '1jn', '1ki', '1pe', '1sa', '1th', '1ti', '2ch',
+        '2co', '2jn', '2ki', '2pe', '2sa', '2th', '2ti', '3jn', 'act',
+        'amo', 'col', 'dan', 'deu', 'ecc', 'eph', 'est', 'exo', 'ezk',
+        'ezr', 'gal', 'gen', 'hab', 'hag', 'heb', 'hos', 'jas', 'jdg',
+        'jer', 'jhn', 'job', 'jol', 'jon', 'jos', 'jud', 'lam', 'lev',
+        'luk', 'mal', 'mat', 'mic', 'mrk', 'nam', 'neh', 'num', 'oba',
+        'phm', 'php', 'pro', 'rev', 'rom', 'rut', 'sng', 'tit', 'zec',
+        'zep', 'isa', 'psa'
+    ]
+
+    usfm_api = 'https://api.unfoldingword.org/{0}/txt/1/{1}-{2}/{3}'
+
+    obs_v1_local = '/var/www/vhosts/api.unfoldingword.org/httpdocs/obs/txt/1'
+    obs_v1_api = 'https://api.unfoldingword.org/obs/txt/1'
+    obs_v1_url = '{0}/obs-catalog.json'.format(obs_v1_api)
+    obs_v2_local = '/var/www/vhosts/api.unfoldingword.org/httpdocs/ts/txt/2'
+    obs_v2_api = 'https://api.unfoldingword.org/ts/txt/2'
+    obs_audio_url = 'https://api.unfoldingword.org/obs/mp3/1/en/en-obs-v4/status.json'
+
+    uw_v2_local = '/var/www/vhosts/api.unfoldingword.org/httpdocs/uw/txt/2/catalog.json'
+    ts_obs_langs_url = 'https://api.unfoldingword.org/ts/txt/2/obs/languages.json'
 
     def __init__(self, domain, slug, lang):
         # format of bible_slug ('domain', 'slug', 'lang-code')
@@ -84,12 +94,11 @@ class CatalogUpdater(object):
 
     @staticmethod
     def obs(obs_v1_cat):
-        global obs_v1_api, obs_v2_local, obs_v2_api
 
         langs_cat = []
         # Write OBS catalog for each language
         for e in obs_v1_cat:
-            file_name = '{0}/{1}/obs-{1}-front-matter.json'.format(obs_v1_local, e['language'])
+            file_name = '{0}/{1}/obs-{1}-front-matter.json'.format(CatalogUpdater.obs_v1_local, e['language'])
             if not os.path.isfile(file_name):
                 continue
 
@@ -110,13 +119,14 @@ class CatalogUpdater(object):
             del e['direction']
             e['slug'] = 'obs'
             e['name'] = 'Open Bible Stories'
-            e['source'] = CatalogUpdater.add_date('{0}/{1}/obs-{1}.json'.format(obs_v1_api, lang))
+            e['source'] = CatalogUpdater.add_date('{0}/{1}/obs-{1}.json'.format(CatalogUpdater.obs_v1_api, lang))
 
             if lang == 'en':
-                e['terms'] = CatalogUpdater.add_date('{0}/{1}/kt-{1}.json'.format(obs_v1_api, lang))
-                e['notes'] = CatalogUpdater.add_date('{0}/{1}/tN-{1}.json'.format(obs_v1_api, lang))
-                e['tw_cat'] = CatalogUpdater.add_date('{0}/{1}/tw_cat-{1}.json'.format(obs_v1_api, lang))
-                e['checking_questions'] = CatalogUpdater.add_date('{0}/{1}/CQ-{1}.json'.format(obs_v1_api, lang))
+                e['terms'] = CatalogUpdater.add_date('{0}/{1}/kt-{1}.json'.format(CatalogUpdater.obs_v1_api, lang))
+                e['notes'] = CatalogUpdater.add_date('{0}/{1}/tN-{1}.json'.format(CatalogUpdater.obs_v1_api, lang))
+                e['tw_cat'] = CatalogUpdater.add_date('{0}/{1}/tw_cat-{1}.json'.format(CatalogUpdater.obs_v1_api, lang))
+                e['checking_questions'] = CatalogUpdater.add_date('{0}/{1}/CQ-{1}.json'.format(
+                    CatalogUpdater.obs_v1_api, lang))
             else:
                 e['terms'] = ''
                 e['notes'] = ''
@@ -124,16 +134,16 @@ class CatalogUpdater(object):
                 e['checking_questions'] = ''
 
             e['date_modified'] = CatalogUpdater.most_recent(e)
-            outfile = '{0}/obs/{1}/resources.json'.format(obs_v2_local, lang)
+            outfile = '{0}/obs/{1}/resources.json'.format(CatalogUpdater.obs_v2_local, lang)
 
             write_file(outfile, [e])
 
-            lang_entry['res_catalog'] = '{0}/obs/{1}/resources.json?date_modified={2}'.format(obs_v2_api, lang,
-                                                                                              e['date_modified'])
+            lang_entry['res_catalog'] = '{0}/obs/{1}/resources.json?date_modified={2}'.format(CatalogUpdater.obs_v2_api,
+                                                                                              lang, e['date_modified'])
             langs_cat.append(lang_entry)
 
         # Write global OBS catalog
-        outfile = '{0}/obs/languages.json'.format(obs_v2_local)
+        outfile = '{0}/obs/languages.json'.format(CatalogUpdater.obs_v2_local)
         write_file(outfile, langs_cat)
 
     @staticmethod
@@ -166,7 +176,7 @@ class CatalogUpdater(object):
             if 'date_modified' not in cat[k]:
                 continue
 
-            if not type(cat[k]) == unicode:
+            if not type(cat[k]) == unicode_type:
                 continue
 
             item_date_mod = cat[k].split('date_modified=')[1]
@@ -176,7 +186,6 @@ class CatalogUpdater(object):
         return date_mod
 
     def bible(self, lang_names, bible_status, bible_bks, langs):
-        global usfm_api, obs_v2_local, obs_v2_api
 
         bks_set = set(bible_bks)
         for bk in bks_set:
@@ -198,9 +207,9 @@ class CatalogUpdater(object):
                     slug_cat = deepcopy(this_status)
 
                     # add link to source
-                    if os.path.isfile('{0}/{1}/{2}/{3}/source.json'.format(obs_v2_local, bk, lang, slug)):
+                    if os.path.isfile('{0}/{1}/{2}/{3}/source.json'.format(self.obs_v2_local, bk, lang, slug)):
                         slug_cat['source'] = CatalogUpdater.add_date('{0}/{1}/{2}/{3}/source.json'
-                                                                     .format(obs_v2_api, bk, lang, slug))
+                                                                     .format(self.obs_v2_api, bk, lang, slug))
                     else:
                         slug_cat['source'] = ''
 
@@ -210,32 +219,33 @@ class CatalogUpdater(object):
                     usfm_name = '{0}-{1}.usfm'.format(this_status['books_published'][bk]['sort'], bk.upper())
 
                     # add link to usfm
-                    slug_cat['usfm'] = usfm_api.format(domain, slug, lang, usfm_name) + '?' + source_date
+                    slug_cat['usfm'] = self.usfm_api.format(domain, slug, lang, usfm_name) + '?' + source_date
 
                     # add link to terms
-                    if os.path.isfile('{0}/bible/{1}/terms.json'.format(obs_v2_local, lang)):
-                        slug_cat['terms'] = CatalogUpdater.add_date('{0}/bible/{1}/terms.json'.format(obs_v2_api, lang))
+                    if os.path.isfile('{0}/bible/{1}/terms.json'.format(self.obs_v2_local, lang)):
+                        slug_cat['terms'] = CatalogUpdater.add_date('{0}/bible/{1}/terms.json'.format(self.obs_v2_api,
+                                                                                                      lang))
                     else:
                         slug_cat['terms'] = ''
 
                     # add link to notes
-                    if os.path.isfile('{0}/{1}/{2}/notes.json'.format(obs_v2_local, bk, lang)):
-                        slug_cat['notes'] = CatalogUpdater.add_date('{0}/{1}/{2}/notes.json'.format(obs_v2_api, bk,
+                    if os.path.isfile('{0}/{1}/{2}/notes.json'.format(self.obs_v2_local, bk, lang)):
+                        slug_cat['notes'] = CatalogUpdater.add_date('{0}/{1}/{2}/notes.json'.format(self.obs_v2_api, bk,
                                                                                                     lang))
                     else:
                         slug_cat['notes'] = ''
 
                     # add link to tW
-                    if os.path.isfile('{0}/{1}/{2}/tw_cat.json'.format(obs_v2_local, bk, lang)):
-                        slug_cat['tw_cat'] = CatalogUpdater.add_date('{0}/{1}/{2}/tw_cat.json'.format(obs_v2_api, bk,
-                                                                                                      lang))
+                    if os.path.isfile('{0}/{1}/{2}/tw_cat.json'.format(self.obs_v2_local, bk, lang)):
+                        slug_cat['tw_cat'] = CatalogUpdater.add_date('{0}/{1}/{2}/tw_cat.json'.format(self.obs_v2_api,
+                                                                                                      bk, lang))
                     else:
                         slug_cat['tw_cat'] = ''
 
                     # add link to tQ
-                    if os.path.isfile('{0}/{1}/{2}/questions.json'.format(obs_v2_local, bk, lang)):
+                    if os.path.isfile('{0}/{1}/{2}/questions.json'.format(self.obs_v2_local, bk, lang)):
                         slug_cat['checking_questions'] = CatalogUpdater.add_date('{0}/{1}/{2}/questions.json'
-                                                                                 .format(obs_v2_api, bk, lang))
+                                                                                 .format(self.obs_v2_api, bk, lang))
                     else:
                         slug_cat['checking_questions'] = ''
 
@@ -250,7 +260,7 @@ class CatalogUpdater(object):
 
                 # only write the file if there is something to publish
                 if resources_cat:
-                    outfile = '{0}/{1}/{2}/resources.json'.format(obs_v2_local, bk, lang_iter)
+                    outfile = '{0}/{1}/{2}/resources.json'.format(self.obs_v2_local, bk, lang_iter)
                     write_file(outfile, resources_cat)
 
         for bk in bks_set:
@@ -278,12 +288,12 @@ class CatalogUpdater(object):
                                              },
                                 'res_catalog': CatalogUpdater.add_date(
                                     '{0}/{1}/{2}/resources.json'.format(
-                                        obs_v2_api, bk, lang_info['lc']))
+                                        self.obs_v2_api, bk, lang_info['lc']))
                                 }
                     res_info['language']['date_modified'] = CatalogUpdater.most_recent(res_info)
                     languages_cat.append(res_info)
                     langs_processed.append(lang)
-            outfile = '{0}/{1}/languages.json'.format(obs_v2_local, bk)
+            outfile = '{0}/{1}/languages.json'.format(self.obs_v2_local, bk)
             write_file(outfile, languages_cat)
 
     @staticmethod
@@ -293,23 +303,22 @@ class CatalogUpdater(object):
 
     @staticmethod
     def ts_cat():
-        global project_dirs, bible_dirs, obs_v2_local, obs_v2_api
 
         ts_categories = []
-        for x in bible_dirs:
-            project_dirs.append(x)
-        for p in project_dirs:
-            file_name = '{0}/{1}/languages.json'.format(obs_v2_local, p)
+        for x in CatalogUpdater.bible_dirs:
+            CatalogUpdater.project_dirs.append(x)
+        for p in CatalogUpdater.project_dirs:
+            file_name = '{0}/{1}/languages.json'.format(CatalogUpdater.obs_v2_local, p)
             proj_cat = load_json_object(file_name)
             if not proj_cat:
                 continue
 
-            proj_url = '{0}/{1}/languages.json'.format(obs_v2_api, p)
+            proj_url = '{0}/{1}/languages.json'.format(CatalogUpdater.obs_v2_api, p)
             dates = set([x['language']['date_modified'] for x in proj_cat])
             dates_list = list(dates)
             dates_list.sort(reverse=True)
             sort = '01'
-            if p in bible_dirs:
+            if p in CatalogUpdater.bible_dirs:
                 sort = [x['project']['sort'] for x in proj_cat if 'project' in x][0]
             meta = []
             if proj_cat[0]['project']['meta']:
@@ -325,11 +334,10 @@ class CatalogUpdater(object):
                                   'meta': meta
                                   })
         # Write global catalog
-        outfile = '{0}/catalog.json'.format(obs_v2_local)
+        outfile = '{0}/catalog.json'.format(CatalogUpdater.obs_v2_local)
         write_file(outfile, ts_categories)
 
     def uw_cat(self, obs_v1_cat, bible_status):
-        global usfm_api, obs_v1_api, uw_v2_local, ts_obs_langs_url
 
         # Create Bible section
         uw_bible = {'title': 'Bible',
@@ -359,7 +367,7 @@ class CatalogUpdater(object):
 
             for x in bk_pub:
                 usfm_name = '{0}-{1}.usfm'.format(bk_pub[x]['sort'], x.upper())
-                source = usfm_api.format(domain, slug, lang, usfm_name)
+                source = self.usfm_api.format(domain, slug, lang, usfm_name)
                 source_sig = source.replace('.usfm', '.sig')
                 pdf = source.replace('.usfm', '.pdf')
                 ver['toc'].append({'title': bk_pub[x]['name'],
@@ -383,7 +391,7 @@ class CatalogUpdater(object):
                   'slug': 'obs',
                   'langs': []
                   }
-        ts_obs_langs_str = get_url(ts_obs_langs_url, True)
+        ts_obs_langs_str = get_url(self.ts_obs_langs_url, True)
         ts_obs_langs = json.loads(ts_obs_langs_str)
         for e in obs_v1_cat:
             date_mod = CatalogUpdater.get_seconds(e['date_modified'])
@@ -394,7 +402,7 @@ class CatalogUpdater(object):
                     desc = x['project']['desc']
                     name = x['project']['name']
             slug = 'obs-{0}'.format(e['language'])
-            source = '{0}/{1}/{2}.json'.format(obs_v1_api, e['language'], slug)
+            source = '{0}/{1}/{2}.json'.format(self.obs_v1_api, e['language'], slug)
             source_sig = source.replace('.json', '.sig')
             media = CatalogUpdater.get_media(e['language'])
             entry = {'lc': e['language'],
@@ -423,17 +431,16 @@ class CatalogUpdater(object):
         mods += [int(x['mod']) for x in uw_obs['langs']]
         mods.sort(reverse=True)
         uw_category = {'cat': [uw_bible, uw_obs], 'mod': mods[0]}
-        write_file(uw_v2_local, uw_category)
+        write_file(self.uw_v2_local, uw_category)
 
     @staticmethod
     def get_media(lang):
-        global obs_audio_url
 
         media = {'audio': {},
                  'video': {},
                  }
         if lang == 'en':
-            obs_audio = get_url(obs_audio_url, True)
+            obs_audio = get_url(CatalogUpdater.obs_audio_url, True)
             media['audio'] = json.loads(obs_audio)
             del media['audio']['slug']
         return media
@@ -449,12 +456,12 @@ class CatalogUpdater(object):
 
 
 def update_catalog(domain=None, slug=None, lang=None):
-    global bible_stat, obs_v1_url, lang_url
+    global bible_stat, lang_url
 
     updater = CatalogUpdater(domain, slug, lang)
 
     # OBS
-    obs_v1 = get_url(obs_v1_url, True)
+    obs_v1 = get_url(CatalogUpdater.obs_v1_url, True)
     obs_v1_catalog = json.loads(obs_v1)
     CatalogUpdater.obs(deepcopy(obs_v1_catalog))
 

@@ -13,6 +13,8 @@ import json
 import os
 import zipfile
 import sys
+import shutil
+
 
 # we need this to check for string versus object
 PY3 = sys.version_info[0] == 3
@@ -33,15 +35,18 @@ def unzip(source_file, destination_dir):
     with zipfile.ZipFile(source_file) as zf:
         zf.extractall(destination_dir)
 
-def add_file_to_zip(zip_file, filename, arcname=None, compress_type=None):
+
+def add_file_to_zip(zip_file, file_name, arc_name=None, compress_type=None):
     """
-    Zip <filename> into <zip_file> as <arcname>.
+    Zip <file_name> into <zip_file> as <arc_name>.
     :param str|unicode zip_file: The file name of the zip file
-    :param str|unicode filename: The name of the file to add, including the path
-    :param str|unicode archname: The new name, with directories, of the file, the same as filename if not given
+    :param str|unicode file_name: The name of the file to add, including the path
+    :param str|unicode arc_name: The new name, with directories, of the file, the same as filename if not given
+    :param str|unicode compress_type:
     """
     with zipfile.ZipFile(zip_file, 'a') as zf:
-        zf.write(filename, arcname, compress_type)
+        zf.write(file_name, arc_name, compress_type)
+
 
 def make_dir(dir_name, linux_mode=0o755, error_if_not_writable=False):
     """
@@ -98,5 +103,28 @@ def write_file(file_name, file_contents, indent=None):
         out_file.write(text_to_write)
 
 
-if __name__ == '__main__':
-    pass
+def copy_tree(src, dst, symlinks=False, ignore=None):
+    """
+    Recursively copy a directory and all subdirectories. Parameters same as shutil.copytree
+    :param src:
+    :param dst:
+    :param symlinks:
+    :param ignore:
+    :return:
+    """
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            copy_tree(s, d, symlinks, ignore)
+        else:
+            # only replace file if modified
+            if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
+                shutil.copy2(s, d)
+
+
+def remove_tree(dir_path, ignore_errors=True):
+    if os.path.isdir(dir_path):
+        shutil.rmtree(dir_path, ignore_errors=ignore_errors)
