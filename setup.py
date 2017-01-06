@@ -7,7 +7,7 @@ with both Python 2.7 and 3.5.'''
 
 setup(
     name="uw_tools",
-    version="0.0.5",
+    version="0.0.6",
     author="unfoldingWord",
     author_email="phillip_hopper@wycliffeassociates.org",
     description="A collection of useful scripts",
