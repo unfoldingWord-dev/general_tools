@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="uw_tools",
-    version="0.0.4",
+    version="0.0.6",
     author="unfoldingWord",
     author_email="unfoldingword.org",
     description="Unit test setup file.",

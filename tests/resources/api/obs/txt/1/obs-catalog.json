@@ -1,0 +1,34 @@
+[
+  {
+    "date_modified": "20160510",
+    "direction": "ltr",
+    "language": "fr",
+    "status": {
+      "checking_entity": "Leadership check",
+      "checking_level": "3",
+      "comments": "",
+      "contributors": "",
+      "publish_date": "2016-05-10",
+      "source_text": "en",
+      "source_text_version": "4",
+      "version": "4.1"
+    },
+    "string": "français"
+  },
+  {
+    "date_modified": "20150826",
+    "direction": "ltr",
+    "language": "en",
+    "status": {
+      "checking_entity": "Distant Shores Media; Wycliffe Associates",
+      "checking_level": "3",
+      "comments": "Original source text.",
+      "contributors": "Distant Shores Media",
+      "publish_date": "2015-08-26",
+      "source_text": "en",
+      "source_text_version": "4",
+      "version": "4"
+    },
+    "string": "English"
+  }
+]
