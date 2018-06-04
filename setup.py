@@ -7,9 +7,9 @@ with both Python 2.7 and 3.5.'''
 
 setup(
     name="uw_tools",
-    version="0.0.6",
+    version="0.0.7",
     author="unfoldingWord",
-    author_email="phillip_hopper@wycliffeassociates.org",
+    author_email="philhopper@sibertec.com",
     description="A collection of useful scripts",
     license="MIT",
     keywords="unfoldingWord python tools",
@@ -17,5 +17,5 @@ setup(
     packages=['general_tools', 'uw'],
     long_description=long_description,
     classifiers=[],
-    requires=['pygithub', 'pyparsing']
+    requires=['pygithub', 'pyparsing', 'pyyaml']
 )
